@@ -106,6 +106,8 @@ export interface 技能释放记录数据 {
 
 export interface 角色状态信息类型 {
   寂洪荒连击: number
+  蹈厉结束时间?: number
+  青山标记结束时间?: number
 }
 
 export interface 模拟信息类型 {
