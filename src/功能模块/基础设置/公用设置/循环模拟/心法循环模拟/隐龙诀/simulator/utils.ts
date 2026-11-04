@@ -11,10 +11,15 @@ export const 根据奇穴修改buff数据 = (_奇穴: string[], _秘籍?: 选中
 }
 
 export const 根据奇穴秘籍修改技能数据 = (
-  _奇穴: string[],
+  奇穴: string[],
   _秘籍: 选中秘籍信息,
 ): 循环基础技能数据类型[] => {
-  return 循环模拟技能基础数据.map((技能) => ({ ...技能 }))
+  return 循环模拟技能基础数据.map((技能) => {
+    if (技能.技能名称 === '寂洪荒') {
+      return { ...技能, 最大充能层数: 奇穴?.includes('风骨') ? 3 : 1 }
+    }
+    return { ...技能 }
+  })
 }
 
 export const ERROR_ACTION = {

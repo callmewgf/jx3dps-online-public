@@ -1,7 +1,8 @@
-import React from 'react'
-import { Space } from 'antd'
+import React, { useMemo } from 'react'
+import { Badge, Space, Tooltip } from 'antd'
+import { 每秒郭氏帧 } from '@/数据/常量'
 import { 获取实际技能数据 } from '../../../通用/通用函数'
-import { 循环基础技能数据类型, 模拟信息类型 } from '../../simulator/type'
+import { 循环基础技能数据类型, 技能GCD组, 模拟信息类型 } from '../../simulator/type'
 import '../../../易筋经/components/AddCycleSkillBtns/index.css'
 
 interface AddCycleSkillBtnsProps {
@@ -49,15 +50,69 @@ function AddCycleSkillBtns(props: AddCycleSkillBtnsProps) {
             {模拟信息?.技能基础数据
               ?.filter((item) => !item.创建循环不可选 && item.技能类型 === 类型)
               .map((item) => (
-                <button type='button' key={item.技能名称} onClick={() => 新增循环技能(item)}>
-                  {item.技能名称}
-                </button>
+                <SkillBtn
+                  key={item.技能名称}
+                  技能={item}
+                  模拟信息={模拟信息}
+                  onClick={() => 新增循环技能(item)}
+                />
               ))}
           </Space>
         </div>
       ))}
     </div>
   )
+}
+
+function SkillBtn(props: {
+  技能: 循环基础技能数据类型
+  模拟信息: 模拟信息类型
+  onClick: () => void
+}) {
+  const { 技能, 模拟信息, onClick } = props
+  const 剩余秒 = 计算可以释放时技能CD(模拟信息, 技能)
+  const 有充能 = !!技能.最大充能层数 && 技能.最大充能层数 > 1
+  const 当前层数 = 有充能 ? 计算技能当前层数(模拟信息, 技能) : 0
+  const 调息秒 = 技能.技能CD ? Math.round((技能.技能CD / 每秒郭氏帧) * 100) / 100 : 0
+  const 提示 = useMemo(() => {
+    if (剩余秒 > 0 && 有充能) return `充能中，下一层还需 ${剩余秒} 秒。${技能.说明 || ''}`
+    if (剩余秒 > 0) return `冷却中，剩余 ${剩余秒} 秒。${技能.说明 || ''}`
+    return 技能.说明 || ''
+  }, [剩余秒, 有充能, 技能.说明])
+
+  return (
+    <div className='ztg-cycle-simulator-setting-btn' onClick={onClick}>
+      <Tooltip title={提示}>
+        <Badge count={剩余秒 > 0 ? 剩余秒 : 0} className='cycle-add-btn-wrap' offset={[0, 0]}>
+          {技能.图标 ? <img className='cycle-add-btn' src={技能.图标} alt='' /> : null}
+          {有充能 ? <span className='cycle-add-btn-count'>{当前层数}</span> : null}
+        </Badge>
+      </Tooltip>
+      <p className='cycle-add-btn-text'>{技能.技能名称}</p>
+      {调息秒 ? (
+        <p className='cycle-add-btn-text'>{有充能 ? `${调息秒}秒/层` : `${调息秒}秒`}</p>
+      ) : null}
+    </div>
+  )
+}
+
+const 计算可以释放时技能CD = (模拟信息: 模拟信息类型, 技能: 循环基础技能数据类型) => {
+  const 待充能时间点 = 模拟信息?.当前各技能运行状态?.[技能?.技能名称]?.待充能时间点
+  if (!待充能时间点?.length) return 0
+  const 可以释放时间 = (模拟信息?.当前时间 || 0) + (检查GCD(技能, 模拟信息.当前GCD组) || 0)
+  const 下次预估释放时间 = 待充能时间点[0]
+  if (下次预估释放时间 <= 可以释放时间) return 0
+  return Math.round(((下次预估释放时间 - 可以释放时间) / 每秒郭氏帧) * 100) / 100
+}
+
+const 计算技能当前层数 = (模拟信息: 模拟信息类型, 技能: 循环基础技能数据类型) => {
+  const 待充能时间点 = 模拟信息?.当前各技能运行状态?.[技能?.技能名称]?.待充能时间点
+  return Math.max((技能?.最大充能层数 || 1) - (待充能时间点?.length || 0), 0)
+}
+
+const 检查GCD = (技能: 循环基础技能数据类型, GCD组: 技能GCD组) => {
+  const 校验GCD组 = 技能.技能GCD组 === '自身' ? 技能.技能名称 : 技能.技能GCD组
+  return 校验GCD组 ? GCD组?.[校验GCD组] || 0 : 0
 }
 
 export default AddCycleSkillBtns
