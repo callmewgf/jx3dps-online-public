@@ -10,7 +10,8 @@ export interface 循环基础技能数据类型 {
   创建循环不可选?: boolean
   显示类型?: string
   是否为倒读条技能?: boolean
-  额外信息?: { 延迟?: number | 'GCD' }
+  可中断倒读条最大跳数?: number
+  额外信息?: { 延迟?: number | 'GCD'; 作用次数?: number }
 }
 
 export interface BuffDTO {

@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Badge, Space, Tooltip } from 'antd'
 import { 每秒郭氏帧 } from '@/数据/常量'
 import { 获取实际技能数据 } from '../../../通用/通用函数'
+import 多段倒读条作用次数弹窗 from '../../../通用/通用组件/多段倒读条作用次数弹窗'
 import { 循环基础技能数据类型, 技能GCD组, 模拟信息类型 } from '../../simulator/type'
 import '../../../易筋经/components/AddCycleSkillBtns/index.css'
 
@@ -54,7 +55,13 @@ function AddCycleSkillBtns(props: AddCycleSkillBtnsProps) {
                   key={item.技能名称}
                   技能={item}
                   模拟信息={模拟信息}
-                  onClick={() => 新增循环技能(item)}
+                  onClick={(额外) =>
+                    新增循环技能(
+                      额外?.作用次数
+                        ? { ...item, 额外信息: { ...item.额外信息, 作用次数: 额外.作用次数 } }
+                        : item,
+                    )
+                  }
                 />
               ))}
           </Space>
@@ -67,9 +74,10 @@ function AddCycleSkillBtns(props: AddCycleSkillBtnsProps) {
 function SkillBtn(props: {
   技能: 循环基础技能数据类型
   模拟信息: 模拟信息类型
-  onClick: () => void
+  onClick: (额外?: { 作用次数?: number }) => void
 }) {
   const { 技能, 模拟信息, onClick } = props
+  const [打断弹窗, 设置打断弹窗] = useState(false)
   const 剩余秒 = 计算可以释放时技能CD(模拟信息, 技能)
   const 有充能 = !!技能.最大充能层数 && 技能.最大充能层数 > 1
   const 当前层数 = 有充能 ? 计算技能当前层数(模拟信息, 技能) : 0
@@ -81,18 +89,38 @@ function SkillBtn(props: {
   }, [剩余秒, 有充能, 技能.说明])
 
   return (
-    <div className='ztg-cycle-simulator-setting-btn' onClick={onClick}>
-      <Tooltip title={提示}>
-        <Badge count={剩余秒 > 0 ? 剩余秒 : 0} className='cycle-add-btn-wrap' offset={[0, 0]}>
-          {技能.图标 ? <img className='cycle-add-btn' src={技能.图标} alt='' /> : null}
-          {有充能 ? <span className='cycle-add-btn-count'>{当前层数}</span> : null}
-        </Badge>
-      </Tooltip>
-      <p className='cycle-add-btn-text'>{技能.技能名称}</p>
-      {调息秒 ? (
-        <p className='cycle-add-btn-text'>{有充能 ? `${调息秒}秒/层` : `${调息秒}秒`}</p>
+    <>
+      <div
+        className='ztg-cycle-simulator-setting-btn'
+        onClick={() => {
+          if (技能.可中断倒读条最大跳数) {
+            设置打断弹窗(true)
+            return
+          }
+          onClick()
+        }}
+      >
+        <Tooltip title={提示}>
+          <Badge count={剩余秒 > 0 ? 剩余秒 : 0} className='cycle-add-btn-wrap' offset={[0, 0]}>
+            {技能.图标 ? <img className='cycle-add-btn' src={技能.图标} alt='' /> : null}
+            {有充能 ? <span className='cycle-add-btn-count'>{当前层数}</span> : null}
+          </Badge>
+        </Tooltip>
+        <p className='cycle-add-btn-text'>{技能.技能名称}</p>
+        {调息秒 ? (
+          <p className='cycle-add-btn-text'>{有充能 ? `${调息秒}秒/层` : `${调息秒}秒`}</p>
+        ) : null}
+      </div>
+      {技能.可中断倒读条最大跳数 ? (
+        <多段倒读条作用次数弹窗
+          open={打断弹窗}
+          maxHit={技能.可中断倒读条最大跳数}
+          title='斩无常提前打断'
+          onCancel={() => 设置打断弹窗(false)}
+          onSubmit={(次数) => onClick({ 作用次数: 次数 })}
+        />
       ) : null}
-    </div>
+    </>
   )
 }
 
