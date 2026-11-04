@@ -5,7 +5,7 @@ class 寂洪荒DOT extends 通用DOT类 {
     const 当前最后一跳 =
       this.DOT运行数据?.待生效数据?.[this.DOT运行数据.待生效数据.length - 1] || {}
     const 当前层数 = 当前最后一跳?.当前层数 || 0
-    const 最大层数 = this.获取当前DOT数据('寂洪荒DOT')?.最大层数 || 3
+    const 最大层数 = this.获取当前DOT数据('寂洪荒DOT')?.最大层数 || 2
     const 新层数 = Math.min(当前层数 + 1, 最大层数)
     this.更新待生效数据(新层数, this.获取当前DOT数据('寂洪荒DOT'))
   }

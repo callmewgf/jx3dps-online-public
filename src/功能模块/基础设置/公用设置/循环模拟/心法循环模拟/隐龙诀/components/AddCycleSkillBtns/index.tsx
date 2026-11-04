@@ -15,7 +15,7 @@ interface AddCycleSkillBtnsProps {
   插入技能?: boolean
 }
 
-const 分组 = ['隐雷鞭', '断水刃', '其他']
+const 分组 = ['隐雷鞭', '断水刃', '冲云链', '其他']
 
 function AddCycleSkillBtns(props: AddCycleSkillBtnsProps) {
   const { 新增循环技能, 批量新增循环, 模拟信息 } = props
