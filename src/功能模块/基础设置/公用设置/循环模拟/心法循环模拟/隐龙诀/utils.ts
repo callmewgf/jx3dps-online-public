@@ -7,7 +7,7 @@ export const getDpsCycle = (data: { 日志?: string; 日志类型?: string; 其�
     const 技能名称 = 当前数据.日志
     const 本次造成伤害次数 = 当前数据?.其他数据?.伤害次数 || 1
     const 本次技能等级 = 当前数据?.其他数据?.技能等级 || 1
-    const 伤害层数 = 技能名称 === '寂洪荒dot-3层' ? 本次技能等级 : 1
+    const 伤害层数 = 技能名称 === '寂洪荒dot' ? 本次技能等级 : 1
     const key = `${技能名称}_${本次技能等级}`
     let 增益列表 = res[key]?.技能增益列表 || []
     const 当前增益名 = 当前数据?.buff列表?.join(',') || ''
