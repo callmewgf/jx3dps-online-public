@@ -19,7 +19,7 @@ interface AddCycleSkillBtnsProps {
 const 分组 = ['隐雷鞭', '断水刃', '冲云链', '其他']
 
 function AddCycleSkillBtns(props: AddCycleSkillBtnsProps) {
-  const { 新增循环技能, 批量新增循环, 模拟信息 } = props
+  const { 新增循环技能, 批量新增循环, 模拟信息, 大橙武模拟 } = props
 
   const 批量新增 = (技能序列: string[]) => {
     const 技能原始数据 = 技能序列
@@ -49,7 +49,10 @@ function AddCycleSkillBtns(props: AddCycleSkillBtnsProps) {
           <span className='ztg-cycle-btn-type'>{类型}</span>
           <Space className='cycle-simulator-setting-skills' size={[8, 16]} wrap>
             {模拟信息?.技能基础数据
-              ?.filter((item) => !item.创建循环不可选 && item.技能类型 === 类型)
+              ?.filter((item) => {
+                if (!大橙武模拟 && item.显示类型 === '大橙武模拟') return false
+                return !item.创建循环不可选 && item.技能类型 === 类型
+              })
               .map((item) => (
                 <SkillBtn
                   key={item.技能名称}

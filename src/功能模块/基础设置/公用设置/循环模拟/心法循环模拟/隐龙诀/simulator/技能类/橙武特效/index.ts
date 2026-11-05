@@ -1,0 +1,27 @@
+import 有CD技能通用类 from '../../通用类/有CD技能通用类'
+
+class 橙武特效 extends 有CD技能通用类 {
+  constructor(模拟循环) {
+    super(模拟循环)
+    this.初始化技能运行数据()
+  }
+
+  释放() {
+    if (!this.模拟循环.大橙武模拟) {
+      return { 可以释放: false, 异常信息: '橙武特效需要装备启用大橙武特效' }
+    }
+    return { 可以释放: true }
+  }
+
+  命中() {
+    this.模拟循环.添加buff({ 名称: '凌雪阁大橙武特效', 对象: '自身', 覆盖层数: 1 })
+    this.保存释放记录()
+  }
+
+  保存释放记录() {
+    const 造成buff数据 = this.获取施加重要buff信息('凌雪阁大橙武特效')
+    this.本次释放记录 = 造成buff数据 ? { 造成buff数据 } : {}
+  }
+}
+
+export default 橙武特效
